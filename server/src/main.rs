@@ -2,12 +2,12 @@ use std::{net::{TcpListener, TcpStream}, thread, io::ErrorKind};
 
 use shared::Buffers;
 
-fn handle_client(stream: TcpStream) { // todo: keep client connected
+fn handle_client(stream: TcpStream) {
     let mut buffers = Buffers::new(stream);
     loop {
-        match buffers.read_message() {
-            Ok(message) => {
-                println!("Received message: {}", message);
+        match buffers.fetch_packet() {
+            Ok(packet) => {
+                println!("Received packet: {:#?}", packet);
             }
             Err(e) => {
                 if e.kind() != ErrorKind::ConnectionReset {
