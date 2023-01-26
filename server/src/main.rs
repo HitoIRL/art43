@@ -1,20 +1,31 @@
-use std::{net::{TcpListener, TcpStream}, thread};
+use std::{net::{TcpListener, TcpStream}, thread, io::ErrorKind};
 
 use shared::Buffers;
 
 fn handle_client(stream: TcpStream) { // todo: keep client connected
-    println!("New client: {}", stream.peer_addr().unwrap());
     let mut buffers = Buffers::new(stream);
-    let message = buffers.read_message();
-    println!("Received message: {}", message);
-    //buffers.send_message(&message);
+    loop {
+        match buffers.read_message() {
+            Ok(message) => {
+                println!("Received message: {}", message);
+            }
+            Err(e) => {
+                if e.kind() != ErrorKind::ConnectionReset {
+                    println!("Failed to read message: {}", e);
+                }
+                break;
+            }
+        }
+    }
 }
 
 fn main() {
     match TcpListener::bind(shared::ADDRESS) {
         Ok(listener) => {
             for stream in listener.incoming() {
-                handle_client(stream.unwrap())
+                thread::spawn(|| { // spawning new thread per connection is very inefficient but for now it's ok
+                    handle_client(stream.unwrap())
+                });
             }
         },
         Err(e) => println!("Failed to bind: {}", e)

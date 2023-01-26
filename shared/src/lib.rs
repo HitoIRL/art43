@@ -1,4 +1,4 @@
-use std::{io::{BufReader, Write, BufRead, LineWriter}, net::TcpStream};
+use std::{io::{BufReader, Write, BufRead, LineWriter, Result}, net::TcpStream};
 
 pub const ADDRESS: &str = "127.0.0.1:39225";
 
@@ -15,15 +15,15 @@ impl Buffers {
         }
     }
 
-    pub fn read_message(&mut self) -> String {
+    pub fn read_message(&mut self) -> Result<String> {
         let mut line = String::new();
-        self.reader.read_line(&mut line).unwrap();
+        self.reader.read_line(&mut line)?;
         line.pop();
-        line
+        Ok(line)
     }
 
     pub fn send_message(&mut self, message: &str) {
         self.writer.write(message.as_bytes()).unwrap();
-        self.writer.write(&['\n' as u8]).unwrap();
+        self.writer.flush().unwrap();
     }
 }
