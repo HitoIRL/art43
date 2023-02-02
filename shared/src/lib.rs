@@ -34,7 +34,7 @@ impl Buffers {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum PacketKind {
-    SetName,
+    SetName, // sent only once after user inputs their name
     Message,
 }
 
